@@ -1,0 +1,62 @@
+COS314 Assignment 2 — Knapsack Solver
+======================================
+
+## Project Structure
+
+  YourProject/
+  ├── src/
+  │   ├── Main.java
+  │   ├── KnapsackInstance.java
+  │   ├── IteratedLocalSearch.java
+  │   └── GeneticAlgorithm.java     <- stub, not yet implemented
+  ├── data/                         <- your Knapsack Instances folder goes here
+  │   ├── f1_l-d_kp_10_269
+  │   ├── f2_l-d_kp_20_878
+  │   ├── f3_l-d_kp_4_20
+  │   ├── f4_l-d_kp_4_11
+  │   ├── f5_l-d_kp_15_375
+  │   ├── f6_l-d_kp_10_60
+  │   ├── f7_l-d_kp_7_50
+  │   ├── knapPI_1_100_1000_1
+  │   ├── f8_l-d_kp_23_10000
+  │   ├── f9_l-d_kp_5_80
+  │   └── f10_l-d_kp_20_879
+  └── KnapsackSolver.jar
+
+IMPORTANT: The "data" folder must be in the same directory as the JAR
+           when you run it — NOT inside src.
+
+## Compiling (from the project root)
+
+  javac -d out src/*.java
+  jar cfe KnapsackSolver.jar Main -C out .
+
+## Running
+
+  java -jar KnapsackSolver.jar
+
+When prompted, enter an integer seed value (e.g. 42).
+
+## Output
+
+A table is printed showing for each of the 10 instances:
+  - Problem instance filename
+  - Algorithm (ILS / GA)
+  - Best solution value found
+  - Known optimum (for reference only — not used by the algorithms)
+  - Runtime in seconds
+
+## Algorithm — Iterated Local Search (ILS)
+
+  1. Generate greedy initial solution (items sorted by value/weight ratio)
+  2. Improve with bit-flip hill climbing (local search)
+  3. For 1000 iterations:
+       a. Perturb: flip 3 random bits
+       b. Local search on perturbed solution
+       c. Accept if >= current fitness (greedy acceptance)
+       d. Track global best
+
+## Status
+
+  ILS  — fully implemented
+  GA   — stub only (returns 0), to be implemented
