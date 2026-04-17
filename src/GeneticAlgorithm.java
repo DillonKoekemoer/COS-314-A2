@@ -84,6 +84,10 @@ public class GeneticAlgorithm {
                 mutate(c1);
                 mutate(c2);
 
+                // Keep offspring feasible so search does not collapse to many zero-fitness individuals.
+                repair(c1, inst);
+                repair(c2, inst);
+
                 newPopulation[i] = c1;
                 if (i + 1 < POPULATION_SIZE) {
                     newPopulation[i + 1] = c2;
@@ -149,5 +153,39 @@ public class GeneticAlgorithm {
             }
         }
         return (totalWeight <= inst.capacity) ? totalValue : 0;
+    }
+
+    // -------------------------------------------------------
+    // Repair — remove worst value/weight items until feasible
+    // -------------------------------------------------------
+    private void repair(int[] individual, KnapsackInstance inst) {
+        double totalWeight = 0;
+        for (int i = 0; i < inst.numItems; i++) {
+            if (individual[i] == 1) {
+                totalWeight += inst.weights[i];
+            }
+        }
+
+        while (totalWeight > inst.capacity) {
+            int worstIdx = -1;
+            double worstRatio = Double.POSITIVE_INFINITY;
+
+            for (int i = 0; i < inst.numItems; i++) {
+                if (individual[i] == 1) {
+                    double ratio = inst.values[i] / inst.weights[i];
+                    if (ratio < worstRatio) {
+                        worstRatio = ratio;
+                        worstIdx = i;
+                    }
+                }
+            }
+
+            if (worstIdx == -1) {
+                break;
+            }
+
+            individual[worstIdx] = 0;
+            totalWeight -= inst.weights[worstIdx];
+        }
     }
 }

@@ -5,7 +5,7 @@ import java.util.Scanner;
  * Represents a single 0/1 Knapsack problem instance.
  * File format expected:
  *   Line 1: <numItems> <capacity>
- *   Lines 2..n+1: <weight> <value>
+ *   Lines 2..n+1: <value> <weight>
  */
 public class KnapsackInstance {
 
