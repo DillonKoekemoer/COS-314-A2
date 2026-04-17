@@ -55,6 +55,7 @@ public class Main {
             String path = DATA_FOLDER + File.separator + FILES[i];
 
             try {
+                System.out.println();
                 KnapsackInstance inst = KnapsackInstance.fromFile(path);
 
                 // ILS
@@ -66,9 +67,14 @@ public class Main {
                 System.out.printf("%-30s %-12s %-15.4f %-15.4f %-12.3f%n",
                     FILES[i], "ILS", ilsBest, KNOWN_OPTIMUMS[i], ilsTime);
 
-                // GA row — placeholder until GA is implemented
-                System.out.printf("%-30s %-12s %-15s %-15.4f %-12s%n",
-                    "", "GA", "N/A", KNOWN_OPTIMUMS[i], "N/A");
+            // GA
+                GeneticAlgorithm ga = new GeneticAlgorithm(seed);
+                long t2       = System.currentTimeMillis();
+                double gaBest = ga.solve(inst);
+                double gaTime = (System.currentTimeMillis() - t2) / 1000.0;
+
+                System.out.printf("%-30s %-12s %-15.4f %-15.4f %-12.3f%n",
+                    "", "GA", gaBest, KNOWN_OPTIMUMS[i], gaTime);
 
             } catch (Exception e) {
                 System.err.println("Could not read: " + path + " — " + e.getMessage());

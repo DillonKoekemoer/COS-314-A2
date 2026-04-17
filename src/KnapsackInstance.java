@@ -29,8 +29,8 @@ public class KnapsackInstance {
         inst.values    = new double[inst.numItems];
 
         for (int i = 0; i < inst.numItems; i++) {
-            inst.weights[i] = sc.nextDouble();
             inst.values[i]  = sc.nextDouble();
+            inst.weights[i] = sc.nextDouble(); 
         }
         sc.close();
         return inst;
