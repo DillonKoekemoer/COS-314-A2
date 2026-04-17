@@ -38,7 +38,7 @@ public class IteratedLocalSearch {
         int[] best    = current.clone();
 
         for (int iter = 0; iter < MAX_ITERATIONS; iter++) {
-            int[] perturbed = perturb(current, PERTURB_STRENGTH);
+            int[] perturbed = perturb(current, PERTURB_STRENGTH, inst);
             int[] candidate = localSearch(perturbed, inst);
 
             // Greedy acceptance: move to candidate if it is at least as good
@@ -113,12 +113,13 @@ public class IteratedLocalSearch {
     // Perturbation — flip k random bits to escape local optima
     // -------------------------------------------------------
 
-    private int[] perturb(int[] solution, int k) {
+    private int[] perturb(int[] solution, int k, KnapsackInstance inst) {
         int[] newSol = solution.clone();
         for (int i = 0; i < k; i++) {
             int idx = rand.nextInt(newSol.length);
             newSol[idx] = 1 - newSol[idx];
         }
+        repair(newSol, inst);
         return newSol;
     }
 
@@ -136,5 +137,36 @@ public class IteratedLocalSearch {
             }
         }
         return (totalWeight <= inst.capacity) ? totalValue : 0;
+    }
+
+    private void repair(int[] solution, KnapsackInstance inst) {
+        double totalWeight = 0;
+        for (int i = 0; i < inst.numItems; i++) {
+            if (solution[i] == 1) {
+                totalWeight += inst.weights[i];
+            }
+        }
+
+        while (totalWeight > inst.capacity) {
+            int worstIdx = -1;
+            double worstRatio = Double.POSITIVE_INFINITY;
+
+            for (int i = 0; i < inst.numItems; i++) {
+                if (solution[i] == 1) {
+                    double ratio = inst.values[i] / inst.weights[i];
+                    if (ratio < worstRatio) {
+                        worstRatio = ratio;
+                        worstIdx = i;
+                    }
+                }
+            }
+
+            if (worstIdx == -1) {
+                break;
+            }
+
+            solution[worstIdx] = 0;
+            totalWeight -= inst.weights[worstIdx];
+        }
     }
 }

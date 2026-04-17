@@ -37,18 +37,34 @@ public class Main {
         295, 1024, 35, 23, 481.0694, 52, 107, 9147, 9767, 130, 1025
     };
 
+    private static String repeatChar(char ch, int count) {
+        StringBuilder sb = new StringBuilder(count);
+        for (int i = 0; i < count; i++) {
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
     public static void main(String[] args) {
         // --- Get seed from user ---
         Scanner sc = new Scanner(System.in);
-        System.out.print("Enter seed value: ");
-        long seed = sc.nextLong();
+        Long seed = null;
+        while (seed == null) {
+            System.out.print("Enter seed value: ");
+            if (sc.hasNextLong()) {
+                seed = sc.nextLong();
+            } else {
+                System.out.println("Invalid seed. Please enter a whole number.");
+                sc.next();
+            }
+        }
         sc.close();
 
-        // --- Print table header ---
+        // --- Print table header ---  
         System.out.println();
-        System.out.printf("%-30s %-12s %-15s %-15s %-12s%n",
-            "Problem Instance", "Algorithm", "Best Solution", "Known Optimum", "Runtime (s)");
-        System.out.println("-".repeat(87));
+        System.out.printf("%-30s %-12s %-12s %-15s %-15s %-12s%n",
+            "Problem Instance", "Algorithm", "Seed Value", "Best Solution", "Known Optimum", "Runtime (s)");
+        System.out.println(repeatChar('-', 100));
 
         // --- Run ILS on each instance ---
         for (int i = 0; i < FILES.length; i++) {
@@ -64,8 +80,8 @@ public class Main {
                 double ilsBest = ils.solve(inst);
                 double ilsTime = (System.currentTimeMillis() - t1) / 1000.0;
 
-                System.out.printf("%-30s %-12s %-15.4f %-15.4f %-12.3f%n",
-                    FILES[i], "ILS", ilsBest, KNOWN_OPTIMUMS[i], ilsTime);
+                System.out.printf("%-30s %-12s %-12d %-15.4f %-15.4f %-12.3f%n",
+                    FILES[i], "ILS", seed, ilsBest, KNOWN_OPTIMUMS[i], ilsTime);
 
             // GA
                 GeneticAlgorithm ga = new GeneticAlgorithm(seed);
@@ -73,8 +89,8 @@ public class Main {
                 double gaBest = ga.solve(inst);
                 double gaTime = (System.currentTimeMillis() - t2) / 1000.0;
 
-                System.out.printf("%-30s %-12s %-15.4f %-15.4f %-12.3f%n",
-                    "", "GA", gaBest, KNOWN_OPTIMUMS[i], gaTime);
+                System.out.printf("%-30s %-12s %-12d %-15.4f %-15.4f %-12.3f%n",
+                    "", "GA", seed, gaBest, KNOWN_OPTIMUMS[i], gaTime);
 
             } catch (Exception e) {
                 System.err.println("Could not read: " + path + " — " + e.getMessage());
