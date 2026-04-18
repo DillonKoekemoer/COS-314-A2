@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class KnapsackInstance 
@@ -19,6 +20,7 @@ public class KnapsackInstance
         inst.filename = new File(path).getName();
 
         Scanner scanner = new Scanner(new File(path));
+        scanner.useLocale(Locale.US);
         inst.numItems  = scanner.nextInt();
         inst.capacity = scanner.nextDouble();
         inst.weights = new double[inst.numItems];
