@@ -38,7 +38,7 @@ java -jar KnapsackSolver.jar
 You will be prompted to enter a seed value. Example:
 
 ```text
-Enter seed value: 42
+Enter seed value: 67
 ```
 
 ## Important Runtime Note

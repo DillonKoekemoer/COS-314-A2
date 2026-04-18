@@ -1,53 +1,43 @@
 import java.util.Arrays;
 import java.util.Random;
 
-/**
- * Iterated Local Search (ILS) for the 0/1 Knapsack Problem.
- *
- * Structure:
- *   1. Generate a greedy initial solution (sort by value/weight ratio)
- *   2. Improve it with bit-flip hill climbing (local search)
- *   3. Repeat for MAX_ITERATIONS:
- *        a. Perturb current solution (flip PERTURB_STRENGTH random bits)
- *        b. Apply local search to the perturbed solution
- *        c. Accept if at least as good as current (greedy acceptance)
- *        d. Track global best
- */
-public class IteratedLocalSearch {
 
-    // --- Configuration ---
-    private static final int MAX_ITERATIONS   = 1000;
-    private static final int PERTURB_STRENGTH = 3;    // bits flipped during perturbation
+public class IteratedLocalSearch 
+{
+
+  
+    private static final int MaxItetations   = 1000;
+    private static final int PerturbStrength = 3;    //bits geflip tydens perturb
 
     private final Random rand;
 
-    public IteratedLocalSearch(long seed) {
+    public IteratedLocalSearch(long seed) 
+    {
         this.rand = new Random(seed);
     }
 
-    // -------------------------------------------------------
-    // Public entry point
-    // -------------------------------------------------------
-
-    /**
-     * Runs ILS on the given instance and returns the best value found.
-     */
-    public double solve(KnapsackInstance inst) {
+ 
+    
+    public double solve(KnapsackInstance inst) 
+    {
         int[] current = generateInitialSolution(inst);
-        current       = localSearch(current, inst);
-        int[] best    = current.clone();
+        current = localSearch(current, inst);
+        int[] best = current.clone();
 
-        for (int iter = 0; iter < MAX_ITERATIONS; iter++) {
-            int[] perturbed = perturb(current, PERTURB_STRENGTH, inst);
+        for (int iter = 0; iter < MaxItetations; iter++) 
+        {
+            int[] perturbed = perturb(current, PerturbStrength, inst);
             int[] candidate = localSearch(perturbed, inst);
 
-            // Greedy acceptance: move to candidate if it is at least as good
-            if (fitness(candidate, inst) >= fitness(current, inst)) {
+            //greedy acceptance
+            if (fitness(candidate, inst) >= fitness(current, inst))
+            {
                 current = candidate;
             }
 
-            // Update global best
-            if (fitness(current, inst) > fitness(best, inst)) {
+            //global best update
+            if (fitness(current, inst) > fitness(best, inst)) 
+                {
                 best = current.clone();
             }
         }
@@ -55,24 +45,27 @@ public class IteratedLocalSearch {
         return fitness(best, inst);
     }
 
-    // -------------------------------------------------------
-    // Initial solution — greedy by value/weight ratio
-    // -------------------------------------------------------
+  
+    //initial solution
 
-    private int[] generateInitialSolution(KnapsackInstance inst) {
-        int n         = inst.numItems;
-        int[] sol     = new int[n];
+
+    private int[] generateInitialSolution(KnapsackInstance inst) 
+    {
+        int n = inst.numItems;
+        int[] sol = new int[n];
         Integer[] idx = new Integer[n];
-        for (int i = 0; i < n; i++) idx[i] = i;
-
-        // Sort descending by value-to-weight ratio
-        Arrays.sort(idx, (a, b) ->
-            Double.compare(inst.values[b] / inst.weights[b],
+        for (int i = 0; i < n; i++) 
+        {
+            idx[i] = i;
+        }
+        Arrays.sort(idx, (a, b) -> Double.compare(inst.values[b] / inst.weights[b],
                            inst.values[a] / inst.weights[a]));
 
         double totalWeight = 0;
-        for (int i : idx) {
-            if (totalWeight + inst.weights[i] <= inst.capacity) {
+        for (int i : idx) 
+        {
+            if (totalWeight + inst.weights[i] <= inst.capacity) 
+            {
                 sol[i]       = 1;
                 totalWeight += inst.weights[i];
             }
@@ -80,28 +73,26 @@ public class IteratedLocalSearch {
         return sol;
     }
 
-    // -------------------------------------------------------
-    // Local search — bit-flip hill climbing
-    // -------------------------------------------------------
 
-    /**
-     * Repeatedly scans all items and flips any bit that improves fitness.
-     * Stops when a full pass produces no improvement.
-     */
-    private int[] localSearch(int[] solution, KnapsackInstance inst) {
+    private int[] localSearch(int[] solution, KnapsackInstance inst) 
+    {
         boolean improved = true;
-        int[] current    = solution.clone();
+        int[] current = solution.clone();
 
-        while (improved) {
+        while (improved) 
+        {
             improved = false;
-            for (int i = 0; i < inst.numItems; i++) {
-                current[i] = 1 - current[i];              // flip bit i
+            for (int i = 0; i < inst.numItems; i++) 
+            {
+                current[i] = 1 - current[i];  //flip bit i
 
-                if (fitness(current, inst) > fitness(solution, inst)) {
-                    solution = current.clone();            // accept improvement
+                if (fitness(current, inst) > fitness(solution, inst)) 
+                {
+                    solution = current.clone(); //aanvaar improvement
                     improved = true;
-                } else {
-                    current[i] = 1 - current[i];          // revert
+                } else 
+                {
+                    current[i] = 1 - current[i];  //gaan terug
                 }
             }
             current = solution.clone();
@@ -109,13 +100,12 @@ public class IteratedLocalSearch {
         return solution;
     }
 
-    // -------------------------------------------------------
-    // Perturbation — flip k random bits to escape local optima
-    // -------------------------------------------------------
 
-    private int[] perturb(int[] solution, int k, KnapsackInstance inst) {
+    private int[] perturb(int[] solution, int k, KnapsackInstance inst) 
+    {
         int[] newSol = solution.clone();
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < k; i++) 
+        {
             int idx = rand.nextInt(newSol.length);
             newSol[idx] = 1 - newSol[idx];
         }
@@ -123,15 +113,15 @@ public class IteratedLocalSearch {
         return newSol;
     }
 
-    // -------------------------------------------------------
-    // Fitness — total value if within capacity, else 0 (infeasible)
-    // -------------------------------------------------------
 
-    public double fitness(int[] solution, KnapsackInstance inst) {
+    public double fitness(int[] solution, KnapsackInstance inst) 
+    {
         double totalWeight = 0;
-        double totalValue  = 0;
-        for (int i = 0; i < inst.numItems; i++) {
-            if (solution[i] == 1) {
+        double totalValue = 0;
+        for (int i = 0; i < inst.numItems; i++) 
+        {
+            if (solution[i] == 1) 
+                {
                 totalWeight += inst.weights[i];
                 totalValue  += inst.values[i];
             }
@@ -139,29 +129,36 @@ public class IteratedLocalSearch {
         return (totalWeight <= inst.capacity) ? totalValue : 0;
     }
 
-    private void repair(int[] solution, KnapsackInstance inst) {
+    private void repair(int[] solution, KnapsackInstance inst) 
+    {
         double totalWeight = 0;
-        for (int i = 0; i < inst.numItems; i++) {
-            if (solution[i] == 1) {
+        for (int i = 0; i < inst.numItems; i++) 
+        {
+            if (solution[i] == 1)
+            {
                 totalWeight += inst.weights[i];
             }
         }
 
-        while (totalWeight > inst.capacity) {
+        while (totalWeight > inst.capacity) 
+        {
             int worstIdx = -1;
             double worstRatio = Double.POSITIVE_INFINITY;
 
-            for (int i = 0; i < inst.numItems; i++) {
+            for (int i = 0; i < inst.numItems; i++) 
+                {
                 if (solution[i] == 1) {
                     double ratio = inst.values[i] / inst.weights[i];
-                    if (ratio < worstRatio) {
+                    if (ratio < worstRatio) 
+                    {
                         worstRatio = ratio;
                         worstIdx = i;
                     }
                 }
             }
 
-            if (worstIdx == -1) {
+            if (worstIdx == -1) 
+            {
                 break;
             }
 

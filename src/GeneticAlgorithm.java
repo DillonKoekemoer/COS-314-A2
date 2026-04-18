@@ -1,39 +1,37 @@
 import java.util.Random;
 
-/**
- * Genetic Algorithm for the 0/1 Knapsack Problem.
- */
 public class GeneticAlgorithm {
 
-    // --- Configuration ---
-    private static final int POPULATION_SIZE = 100;
-    private static final int MAX_GENERATIONS = 1000;
-    private static final double CROSSOVER_RATE = 0.8;
-    private static final double MUTATION_RATE = 0.05;
-    private static final int TOURNAMENT_SIZE = 5;
-
+    private static final int popSize = 100;
+    private static final int maxGens = 1000;
+    private static final double crossRate = 0.75;
+    private static final double mutateRate = 0.05;
+    private static final int tournamentSize = 5;
     private final Random rand;
 
-    public GeneticAlgorithm(long seed) {
+    public GeneticAlgorithm(long seed) 
+    {
         this.rand = new Random(seed);
     }
 
-    /**
-     * Runs the GA on the given instance and returns the best value found.
-     */
-    public double solve(KnapsackInstance inst) {
+    public double solve(KnapsackInstance inst) 
+    {
         int n = inst.numItems;
-        int[][] population = new int[POPULATION_SIZE][n];
+        int[][] population = new int[popSize][n];
 
-    // 1. Initialize population randomly (Capacity-Aware)
-        for (int i = 0; i < POPULATION_SIZE; i++) {
+    //random pop
+        for (int i = 0; i < popSize; i++) 
+            {
             double currentWeight = 0;
-            for (int j = 0; j < n; j++) {
-                // Try to add the item randomly (50% chance), BUT only if it fits!
-                if (rand.nextBoolean() && currentWeight + inst.weights[j] <= inst.capacity) {
+            for (int j = 0; j < n; j++) 
+                {
+                //add randomly net as dit in pas
+                if (rand.nextBoolean() && currentWeight + inst.weights[j] <= inst.capacity) 
+                    {
                     population[i][j] = 1;
                     currentWeight += inst.weights[j];
-                } else {
+                } else 
+                    {
                     population[i][j] = 0;
                 }
             }
@@ -42,54 +40,58 @@ public class GeneticAlgorithm {
         int[] bestOverall = null;
         double bestOverallFitness = -1;
 
-        // 2. Evolution Loop
-        for (int gen = 0; gen < MAX_GENERATIONS; gen++) {
-            int[][] newPopulation = new int[POPULATION_SIZE][n];
+        //evo loop
+        for (int gen = 0; gen < maxGens; gen++) 
+            {
+            int[][] newPopulation = new int[popSize][n];
 
-            // Find the best individual in the current generation (Elitism)
-            int bestIdx = 0;
+            //elitism
+            int bestId = 0;
             double bestFit = fitness(population[0], inst);
-            for (int i = 1; i < POPULATION_SIZE; i++) {
+            for (int i = 1; i < popSize; i++) 
+                {
                 double fit = fitness(population[i], inst);
                 if (fit > bestFit) {
                     bestFit = fit;
-                    bestIdx = i;
+                    bestId = i;
                 }
             }
 
-            // Update global best
-            if (bestOverall == null || bestFit > bestOverallFitness) {
+            //update global best
+            if (bestOverall == null || bestFit > bestOverallFitness) 
+                {
                 bestOverallFitness = bestFit;
-                bestOverall = population[bestIdx].clone();
+                bestOverall = population[bestId].clone();
             }
 
-            // Carry over the best individual unchanged
-            newPopulation[0] = population[bestIdx].clone();
+            newPopulation[0] = population[bestId].clone();
 
-            // Create the rest of the new generation
-            for (int i = 1; i < POPULATION_SIZE; i += 2) {
-                // Selection
+            //maak res van die nuwe gen
+            for (int i = 1; i < popSize; i += 2) 
+                {
+                //selection
                 int[] p1 = select(population, inst);
                 int[] p2 = select(population, inst);
 
                 int[] c1 = p1.clone();
                 int[] c2 = p2.clone();
 
-                // Crossover
-                if (rand.nextDouble() < CROSSOVER_RATE) {
+                //crossover
+                if (rand.nextDouble() < crossRate) 
+                    {
                     crossover(p1, p2, c1, c2);
                 }
 
-                // Mutation
+                //mutation
                 mutate(c1);
                 mutate(c2);
 
-                // Keep offspring feasible so search does not collapse to many zero-fitness individuals.
                 repair(c1, inst);
                 repair(c2, inst);
 
                 newPopulation[i] = c1;
-                if (i + 1 < POPULATION_SIZE) {
+                if (i + 1 < popSize) 
+                    {
                     newPopulation[i + 1] = c2;
                 }
             }
@@ -100,53 +102,54 @@ public class GeneticAlgorithm {
         return bestOverallFitness;
     }
 
-    // -------------------------------------------------------
-    // Selection — Tournament Selection
-    // -------------------------------------------------------
-    private int[] select(int[][] population, KnapsackInstance inst) {
-        int bestIdx = rand.nextInt(POPULATION_SIZE);
-        double bestFit = fitness(population[bestIdx], inst);
+  
+    //tournament selection
+  
+    private int[] select(int[][] population, KnapsackInstance inst) 
+    {
+        int bestId = rand.nextInt(popSize);
+        double bestFit = fitness(population[bestId], inst);
 
-        for (int i = 1; i < TOURNAMENT_SIZE; i++) {
-            int idx = rand.nextInt(POPULATION_SIZE);
+        for (int i = 1; i < tournamentSize; i++)
+            {
+            int idx = rand.nextInt(popSize);
             double fit = fitness(population[idx], inst);
-            if (fit > bestFit) {
+            if (fit > bestFit) 
+                {
                 bestFit = fit;
-                bestIdx = idx;
+                bestId = idx;
             }
         }
-        return population[bestIdx];
+        return population[bestId];
     }
 
-    // -------------------------------------------------------
-    // Crossover — Single-Point Crossover
-    // -------------------------------------------------------
-    private void crossover(int[] p1, int[] p2, int[] c1, int[] c2) {
+
+    //single pt crossover
+    private void crossover(int[] p1, int[] p2, int[] c1, int[] c2) 
+    {
         int crossoverPoint = rand.nextInt(p1.length);
-        for (int i = crossoverPoint; i < p1.length; i++) {
+        for (int i = crossoverPoint; i < p1.length; i++) 
+            {
             c1[i] = p2[i];
             c2[i] = p1[i];
         }
     }
-
-    // -------------------------------------------------------
-    // Mutation — Bit-Flip Mutation
-    // -------------------------------------------------------
+ 
     private void mutate(int[] individual) {
         for (int i = 0; i < individual.length; i++) {
-            if (rand.nextDouble() < MUTATION_RATE) {
+            if (rand.nextDouble() < mutateRate) {
                 individual[i] = 1 - individual[i]; // Flip bit
             }
         }
     }
 
-    // -------------------------------------------------------
-    // Fitness — total value if within capacity, else 0
-    // -------------------------------------------------------
-    private double fitness(int[] solution, KnapsackInstance inst) {
+    //fitness
+    private double fitness(int[] solution, KnapsackInstance inst) 
+    {
         double totalWeight = 0;
         double totalValue = 0;
-        for (int i = 0; i < inst.numItems; i++) {
+        for (int i = 0; i < inst.numItems; i++) 
+            {
             if (solution[i] == 1) {
                 totalWeight += inst.weights[i];
                 totalValue += inst.values[i];
@@ -155,37 +158,43 @@ public class GeneticAlgorithm {
         return (totalWeight <= inst.capacity) ? totalValue : 0;
     }
 
-    // -------------------------------------------------------
-    // Repair — remove worst value/weight items until feasible
-    // -------------------------------------------------------
-    private void repair(int[] individual, KnapsackInstance inst) {
+  
+    private void repair(int[] individual, KnapsackInstance inst) 
+    {
         double totalWeight = 0;
-        for (int i = 0; i < inst.numItems; i++) {
-            if (individual[i] == 1) {
+        for (int i = 0; i < inst.numItems; i++) 
+            {
+            if (individual[i] == 1) 
+                {
                 totalWeight += inst.weights[i];
             }
         }
 
-        while (totalWeight > inst.capacity) {
-            int worstIdx = -1;
+        while (totalWeight > inst.capacity) 
+            {
+            int worstId = -1;
             double worstRatio = Double.POSITIVE_INFINITY;
 
-            for (int i = 0; i < inst.numItems; i++) {
-                if (individual[i] == 1) {
+            for (int i = 0; i < inst.numItems; i++) 
+                {
+                if (individual[i] == 1)
+                     {
                     double ratio = inst.values[i] / inst.weights[i];
-                    if (ratio < worstRatio) {
+                    if (ratio < worstRatio) 
+                        {
                         worstRatio = ratio;
-                        worstIdx = i;
+                        worstId = i;
                     }
                 }
             }
 
-            if (worstIdx == -1) {
+            if (worstId == -1) 
+                {
                 break;
             }
 
-            individual[worstIdx] = 0;
-            totalWeight -= inst.weights[worstIdx];
+            individual[worstId] = 0;
+            totalWeight -= inst.weights[worstId];
         }
     }
 }
